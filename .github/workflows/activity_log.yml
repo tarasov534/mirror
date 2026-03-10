@@ -16,7 +16,7 @@ jobs:
       - name: Fetch SOL Price
         run: |
           # 1. Випадкова затримка (до 25 хвилин)
-          sleep $((RANDOM % 1500))
+          sleep $((RANDOM % 1000))
           
           TIMESTAMP=$(date "+%Y-%m-%d %H:%M")
 
@@ -41,7 +41,7 @@ jobs:
           echo "$(tail -n 30 $FILE_NAME)" > $FILE_NAME
 
           # 5. Налаштування Git та Пуш
-          git config --local user.email "action@github.com"
+          git config --local user.email "vk0755277@gmail.com"
           git config --local user.name "GitHub Action Bot"
           
           git add $FILE_NAME
