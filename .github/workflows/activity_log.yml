@@ -1,0 +1,49 @@
+name: SOL Bot
+
+on:
+  schedule:
+    # Приклад: запуск о 15-й хвилині кожні 4 години (щоб не одночасно з іншими)
+    - cron: '10 */5 * * *'
+  workflow_dispatch:
+
+jobs:
+  make-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Fetch SOL Price
+        run: |
+          # 1. Випадкова затримка (до 25 хвилин)
+          sleep $((RANDOM % 1500))
+          
+          TIMESTAMP=$(date "+%Y-%m-%d %H:%M")
+
+          # 2. Отримуємо ціну SOLANA
+          RESPONSE=$(curl -s --max-time 15 "https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd")
+          SOL=$(echo $RESPONSE | jq -r '.solana.usd // empty')
+
+          # 3. Перевірка на помилку API та формування запису
+          if [ -z "$SOL" ] || [ "$SOL" == "null" ]; then
+            # ТУТ ПІДСТАВТЕ СВОЄ СИСТЕМНЕ ПОВІДОМЛЕННЯ (наприклад, для акаунта №4)
+            LOG_ENTRY="[$TIMESTAMP] Status: maintenance mode"
+            COMMIT_MSG="node: status check $TIMESTAMP [skip ci]"
+          else
+            LOG_ENTRY="[$TIMESTAMP] Solana Market: \$$SOL USD"
+            COMMIT_MSG="sol: update index $TIMESTAMP [skip ci]"
+          fi
+
+          # 4. Записуємо у файл (ТУТ ПІДСТАВТЕ СВОЮ НАЗВУ ФАЙЛУ, наприклад, node_status.json)
+          FILE_NAME="activity_log.db"
+          
+          echo "$LOG_ENTRY" >> $FILE_NAME
+          echo "$(tail -n 30 $FILE_NAME)" > $FILE_NAME
+
+          # 5. Налаштування Git та Пуш
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action Bot"
+          
+          git add $FILE_NAME
+          git commit -m "$COMMIT_MSG"
+          git push
