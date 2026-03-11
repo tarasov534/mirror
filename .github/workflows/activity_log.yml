@@ -3,7 +3,7 @@ name: SOL Bot
 on:
   schedule:
     # Приклад: запуск о 15-й хвилині кожні 4 години (щоб не одночасно з іншими)
-    - cron: '10 */5 * * *'
+    - cron: '10 */8 * * *'
   workflow_dispatch:
 
 jobs:
